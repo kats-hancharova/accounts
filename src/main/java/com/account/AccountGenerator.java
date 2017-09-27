@@ -25,31 +25,15 @@ public class AccountGenerator {
 
         Map<String, Integer> mapIpPort = collectProxies(driver);
 
-        List<String> credentials = new ArrayList();
+        List<String> credentials = new ArrayList<>();
 
         for (Map.Entry<String, Integer> pairIpPort : mapIpPort.entrySet()) {
             WebDriver driverProxy = new FirefoxDriver(setUpProxy(pairIpPort.getKey(), pairIpPort.getValue()));
             setUpDriver(driverProxy);
 
-            driverProxy.get(properties.getString("signUpPage"));
-            driverProxy.findElement(By.id("FirstName")).sendKeys(properties.getString("firstName"));
-            driverProxy.findElement(By.id("LastName")).sendKeys(properties.getString("lastName"));
-
             String email = RandomStringUtils.randomAlphanumeric(Integer.parseInt(properties.getString("minEmailLength")), Integer.parseInt(properties.getString("maxEmailLength")));
-            driverProxy.findElement(By.id("GmailAddress")).sendKeys(email);
-            driverProxy.findElement(By.id("Passwd")).sendKeys(properties.getString("password"));
-            driverProxy.findElement(By.id("PasswdAgain")).sendKeys(properties.getString("password"));
-            driverProxy.findElement(By.id("BirthMonth")).click();
 
-            chooseElementFromList(driverProxy, By.cssSelector("[id='BirthMonth'] [class='goog-menuitem-content']"), properties.getString("birthMonth"));
-
-            driverProxy.findElement(By.id("BirthDay")).sendKeys(properties.getString("birthDay"));
-            driverProxy.findElement(By.id("BirthYear")).sendKeys(properties.getString("birthYear"));
-            driverProxy.findElement(By.id("Gender")).click();
-
-            chooseElementFromList(driverProxy, By.cssSelector("[id='Gender'] [class='goog-menuitem-content']"), properties.getString("gender"));
-
-            driverProxy.findElement(By.id("submitbutton")).click();
+            fillOutSignUpForm (driverProxy, properties, email);
 
             driverProxy.switchTo().activeElement();
 
@@ -111,7 +95,7 @@ public class AccountGenerator {
         driver.findElement(By.cssSelector("#proxylisttable>tfoot>tr>th:nth-of-type(5)>select")).click();
         driver.findElement(By.cssSelector("#proxylisttable>tfoot>tr>th:nth-of-type(5)>select>[value='anonymous']")).click();
 
-        HashMap<String, Integer> mapIpPort = new HashMap();
+        HashMap<String, Integer> mapIpPort = new HashMap<>();
         int numberOfIPAddresses = driver.findElements(By.cssSelector("#proxylisttable>tbody>tr")).size();
 
         for (int i = 1; i <= numberOfIPAddresses; i++) {
@@ -121,6 +105,27 @@ public class AccountGenerator {
         driver.close();
 
         return mapIpPort;
+    }
+
+    private static void fillOutSignUpForm (WebDriver driverProxy, ResourceBundle properties, String email) {
+        driverProxy.get(properties.getString("signUpPage"));
+        driverProxy.findElement(By.id("FirstName")).sendKeys(properties.getString("firstName"));
+        driverProxy.findElement(By.id("LastName")).sendKeys(properties.getString("lastName"));
+
+        driverProxy.findElement(By.id("GmailAddress")).sendKeys(email);
+        driverProxy.findElement(By.id("Passwd")).sendKeys(properties.getString("password"));
+        driverProxy.findElement(By.id("PasswdAgain")).sendKeys(properties.getString("password"));
+        driverProxy.findElement(By.id("BirthMonth")).click();
+
+        chooseElementFromList(driverProxy, By.cssSelector("[id='BirthMonth'] [class='goog-menuitem-content']"), properties.getString("birthMonth"));
+
+        driverProxy.findElement(By.id("BirthDay")).sendKeys(properties.getString("birthDay"));
+        driverProxy.findElement(By.id("BirthYear")).sendKeys(properties.getString("birthYear"));
+        driverProxy.findElement(By.id("Gender")).click();
+
+        chooseElementFromList(driverProxy, By.cssSelector("[id='Gender'] [class='goog-menuitem-content']"), properties.getString("gender"));
+
+        driverProxy.findElement(By.id("submitbutton")).click();
     }
 
 }
