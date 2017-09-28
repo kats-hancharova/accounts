@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 public class AccountGenerator {
 
-    public static void main(String[] args) throws InterruptedException, IOException {
+    public static void main(String[] args) {
         ResourceBundle properties = ResourceBundle.getBundle("config");
         String driverLocation = properties.getString("driverLocation");
 
@@ -23,33 +23,35 @@ public class AccountGenerator {
         WebDriver driver = new FirefoxDriver();
         setUpDriver(driver);
 
-        Map<String, Integer> mapIpPort = collectProxies(driver);
+        List<Proxy> listIpPort = collectProxies(driver, properties);
 
-        List<String> credentials = new ArrayList<>();
-
-        for (Map.Entry<String, Integer> pairIpPort : mapIpPort.entrySet()) {
-            WebDriver driverProxy = new FirefoxDriver(setUpProxy(pairIpPort.getKey(), pairIpPort.getValue()));
+        for (Proxy item: listIpPort) {
+            WebDriver driverProxy = new FirefoxDriver(setUpProxy(item.getIp(), item.getPort()));
             setUpDriver(driverProxy);
+            String email = RandomStringUtils.randomAlphanumeric(Integer.parseInt(properties.getString("minEmailLength")),
+                    Integer.parseInt(properties.getString("maxEmailLength")));
 
-            String email = RandomStringUtils.randomAlphanumeric(Integer.parseInt(properties.getString("minEmailLength")), Integer.parseInt(properties.getString("maxEmailLength")));
+            try {
+                fillOutSignUpForm (driverProxy, properties, email);
 
-            fillOutSignUpForm (driverProxy, properties, email);
+                driverProxy.switchTo().activeElement();
 
-            driverProxy.switchTo().activeElement();
-
-            if (driverProxy.findElement(By.className("tos-scroll-button-icon")).isDisplayed()) {
-                do {
-                    driverProxy.findElement(By.className("tos-scroll-button-icon")).click();
-                    Thread.sleep(1000L);
-                } while (driverProxy.findElement(By.className("tos-scroll-button-icon")).isDisplayed());
-            } else {
-                driverProxy.navigate().refresh();
-                continue;
+                if (driverProxy.findElement(By.className("tos-scroll-button-icon")).isDisplayed()) {
+                    do {
+                        driverProxy.findElement(By.className("tos-scroll-button-icon")).click();
+                        Thread.sleep(1000L);
+                    } while (driverProxy.findElement(By.className("tos-scroll-button-icon")).isDisplayed());
+                } else {
+                    driverProxy.close();
+                    continue;
+                }
+                clickElement(driverProxy, "iagreebutton");
+                writeToFile(email, properties.getString("password"), properties);
+            } catch (NumberFormatException|InterruptedException|IOException e) {
+                e.printStackTrace();
+            } finally {
+                driverProxy.close();
             }
-            driverProxy.findElement(By.id("iagreebutton")).click();
-
-            writeToFile(email, properties.getString("password"), credentials, properties);
-            driverProxy.close();
         }
     }
 
@@ -76,10 +78,10 @@ public class AccountGenerator {
         }
     }
 
-    private static void writeToFile(String email, String password, List<String> credentials, ResourceBundle properties) throws IOException {
-        credentials.add(email + "@gmail.com," + password);
+    private static void writeToFile(String email, String password, ResourceBundle properties) throws IOException {
+        String credentials = email + "@gmail.com," + password;
         String credentialsLocation = properties.getString("credentialsLocation");
-        Files.write(Paths.get(credentialsLocation), credentials);
+        Files.write(Paths.get(credentialsLocation), credentials.getBytes());
     }
 
     private static void setUpDriver(WebDriver driver) {
@@ -87,45 +89,58 @@ public class AccountGenerator {
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
     }
 
-    private static HashMap<String, Integer> collectProxies(WebDriver driver) {
-        driver.get("https://free-proxy-list.net/");
+    private static List<Proxy> collectProxies(WebDriver driver, ResourceBundle properties) {
+        getPageURL(driver, properties, "proxyListPage");
 
-        driver.findElement(By.cssSelector(".hx.ui-state-default>select")).click();
-        driver.findElement(By.cssSelector(".hx.ui-state-default>select>[value='yes']")).click();
-        driver.findElement(By.cssSelector("#proxylisttable>tfoot>tr>th:nth-of-type(5)>select")).click();
-        driver.findElement(By.cssSelector("#proxylisttable>tfoot>tr>th:nth-of-type(5)>select>[value='anonymous']")).click();
+        setElementValueByCssSelector(driver, ".hx.ui-state-default>select");
+        setElementValueByCssSelector(driver, ".hx.ui-state-default>select>[value='yes']");
+        setElementValueByCssSelector(driver, "#proxylisttable>tfoot>tr>th:nth-of-type(5)>select");
+        setElementValueByCssSelector(driver, "#proxylisttable>tfoot>tr>th:nth-of-type(5)>select>[value='anonymous']");
 
-        HashMap<String, Integer> mapIpPort = new HashMap<>();
+        List<Proxy> listIpPort = new ArrayList<>();
+
         int numberOfIPAddresses = driver.findElements(By.cssSelector("#proxylisttable>tbody>tr")).size();
 
         for (int i = 1; i <= numberOfIPAddresses; i++) {
-            mapIpPort.put(driver.findElement(By.cssSelector("tbody>tr:nth-of-type(" + i + ")>td:nth-of-type(1)")).getText(),
-                    Integer.parseInt(driver.findElement(By.cssSelector("tbody>tr:nth-of-type(" + i + ")>td:nth-of-type(2)")).getText()));
+            listIpPort.add(new Proxy(driver.findElement(By.cssSelector("tbody>tr:nth-of-type(" + i + ")>td:nth-of-type(1)")).getText(),
+                    Integer.parseInt(driver.findElement(By.cssSelector("tbody>tr:nth-of-type(" + i + ")>td:nth-of-type(2)")).getText())));
         }
         driver.close();
-
-        return mapIpPort;
+        return listIpPort;
     }
 
-    private static void fillOutSignUpForm (WebDriver driverProxy, ResourceBundle properties, String email) {
-        driverProxy.get(properties.getString("signUpPage"));
-        driverProxy.findElement(By.id("FirstName")).sendKeys(properties.getString("firstName"));
-        driverProxy.findElement(By.id("LastName")).sendKeys(properties.getString("lastName"));
+    private static void fillOutSignUpForm (WebDriver driver, ResourceBundle properties, String email) {
+        getPageURL(driver, properties, "signUpPage");
+        setElementValueById(driver, properties, "FirstName", "firstName");
+        setElementValueById(driver, properties, "LastName", "lastName");
+        driver.findElement(By.id("GmailAddress")).sendKeys(email);
+        setElementValueById(driver, properties, "Passwd", "password");
+        setElementValueById(driver, properties, "PasswdAgain", "password");
+        clickElement(driver, "BirthMonth");
+        chooseElementFromList(driver, By.cssSelector("[id='BirthMonth'] [class='goog-menuitem-content']"),
+                properties.getString("birthMonth"));
+        setElementValueById(driver, properties, "BirthDay", "birthDay");
+        setElementValueById(driver, properties, "BirthYear", "birthYear");
+        clickElement(driver, "Gender");
+        chooseElementFromList(driver, By.cssSelector("[id='Gender'] [class='goog-menuitem-content']"),
+                properties.getString("gender"));
+        clickElement(driver, "submitbutton");
+    }
 
-        driverProxy.findElement(By.id("GmailAddress")).sendKeys(email);
-        driverProxy.findElement(By.id("Passwd")).sendKeys(properties.getString("password"));
-        driverProxy.findElement(By.id("PasswdAgain")).sendKeys(properties.getString("password"));
-        driverProxy.findElement(By.id("BirthMonth")).click();
+    private static void setElementValueById (WebDriver driver, ResourceBundle properties, String elementId, String elementValue) {
+        driver.findElement(By.id(elementId)).sendKeys(properties.getString(elementValue));
+    }
 
-        chooseElementFromList(driverProxy, By.cssSelector("[id='BirthMonth'] [class='goog-menuitem-content']"), properties.getString("birthMonth"));
+    private static void setElementValueByCssSelector (WebDriver driver, String elementCssSelector) {
+        driver.findElement(By.cssSelector(elementCssSelector)).click();
+    }
 
-        driverProxy.findElement(By.id("BirthDay")).sendKeys(properties.getString("birthDay"));
-        driverProxy.findElement(By.id("BirthYear")).sendKeys(properties.getString("birthYear"));
-        driverProxy.findElement(By.id("Gender")).click();
+    private static void clickElement (WebDriver driver, String elementId) {
+        driver.findElement(By.id(elementId)).click();
+    }
 
-        chooseElementFromList(driverProxy, By.cssSelector("[id='Gender'] [class='goog-menuitem-content']"), properties.getString("gender"));
-
-        driverProxy.findElement(By.id("submitbutton")).click();
+    private static void getPageURL (WebDriver driver, ResourceBundle properties, String pageURL) {
+        driver.get(properties.getString(pageURL));
     }
 
 }
