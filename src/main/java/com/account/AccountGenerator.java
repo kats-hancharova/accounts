@@ -5,6 +5,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.FirefoxProfile;
 
 import java.io.IOException;
@@ -15,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 public class AccountGenerator {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         ResourceBundle properties = ResourceBundle.getBundle("config");
         String driverLocation = properties.getString("driverLocation");
 
@@ -24,15 +25,18 @@ public class AccountGenerator {
         setUpDriver(driver);
 
         List<Proxy> listIpPort = collectProxies(driver, properties);
+        List<String> credentials = new ArrayList<>();
 
-        for (Proxy item: listIpPort) {
-            @SuppressWarnings("deprecation") WebDriver driverProxy = new FirefoxDriver(setUpProxy(item.getIp(), item.getPort()));
+        for (Proxy item : listIpPort) {
+            final FirefoxOptions options = new FirefoxOptions().setProfile(setUpProxy(item.getIp(), item.getPort()));
+            final WebDriver driverProxy = new FirefoxDriver(options);
+
             setUpDriver(driverProxy);
             String email = RandomStringUtils.randomAlphanumeric(Integer.parseInt(properties.getString("minEmailLength")),
                     Integer.parseInt(properties.getString("maxEmailLength")));
 
             try {
-                fillOutSignUpForm (driverProxy, properties, email);
+                fillOutSignUpForm(driverProxy, properties, email);
 
                 driverProxy.switchTo().activeElement();
 
@@ -46,10 +50,11 @@ public class AccountGenerator {
                     continue;
                 }
                 clickElement(driverProxy, "iagreebutton");
-                writeToFile(email, properties.getString("password"), properties);
-            } catch (NumberFormatException|InterruptedException|IOException e) {
+                credentials.add(email + "@gmail.com," + properties.getString("password"));
+            } catch (NumberFormatException | InterruptedException e) {
                 e.printStackTrace();
             } finally {
+                Files.write(Paths.get(properties.getString("credentialsLocation")), credentials);
                 driverProxy.close();
             }
         }
@@ -78,12 +83,6 @@ public class AccountGenerator {
         }
     }
 
-    private static void writeToFile(String email, String password, ResourceBundle properties) throws IOException {
-        String credentials = email + "@gmail.com," + password;
-        String credentialsLocation = properties.getString("credentialsLocation");
-        Files.write(Paths.get(credentialsLocation), credentials.getBytes());
-    }
-
     private static void setUpDriver(WebDriver driver) {
         driver.manage().window().maximize();
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
@@ -109,7 +108,7 @@ public class AccountGenerator {
         return listIpPort;
     }
 
-    private static void fillOutSignUpForm (WebDriver driver, ResourceBundle properties, String email) {
+    private static void fillOutSignUpForm(WebDriver driver, ResourceBundle properties, String email) {
         getPageURL(driver, properties, "signUpPage");
         setElementValueById(driver, properties, "FirstName", "firstName");
         setElementValueById(driver, properties, "LastName", "lastName");
@@ -127,19 +126,19 @@ public class AccountGenerator {
         clickElement(driver, "submitbutton");
     }
 
-    private static void setElementValueById (WebDriver driver, ResourceBundle properties, String elementId, String elementValue) {
+    private static void setElementValueById(WebDriver driver, ResourceBundle properties, String elementId, String elementValue) {
         driver.findElement(By.id(elementId)).sendKeys(properties.getString(elementValue));
     }
 
-    private static void setElementValueByCssSelector (WebDriver driver, String elementCssSelector) {
+    private static void setElementValueByCssSelector(WebDriver driver, String elementCssSelector) {
         driver.findElement(By.cssSelector(elementCssSelector)).click();
     }
 
-    private static void clickElement (WebDriver driver, String elementId) {
+    private static void clickElement(WebDriver driver, String elementId) {
         driver.findElement(By.id(elementId)).click();
     }
 
-    private static void getPageURL (WebDriver driver, ResourceBundle properties, String pageURL) {
+    private static void getPageURL(WebDriver driver, ResourceBundle properties, String pageURL) {
         driver.get(properties.getString(pageURL));
     }
 
