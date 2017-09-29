@@ -46,11 +46,12 @@ public class AccountGenerator {
                         Thread.sleep(1000L);
                     } while (driverProxy.findElement(By.className("tos-scroll-button-icon")).isDisplayed());
                 } else {
-                    driverProxy.close();
                     continue;
                 }
                 clickElement(driverProxy, "iagreebutton");
-                credentials.add(email + "@gmail.com," + properties.getString("password"));
+                if (driverProxy.findElements(By.cssSelector(".welcome>h1")).size() > 0) {
+                    credentials.add(email + "@gmail.com," + properties.getString("password"));
+                }
             } catch (NumberFormatException | InterruptedException e) {
                 e.printStackTrace();
             } finally {
@@ -93,8 +94,6 @@ public class AccountGenerator {
 
         setElementValueByCssSelector(driver, ".hx.ui-state-default>select");
         setElementValueByCssSelector(driver, ".hx.ui-state-default>select>[value='yes']");
-        setElementValueByCssSelector(driver, "#proxylisttable>tfoot>tr>th:nth-of-type(5)>select");
-        setElementValueByCssSelector(driver, "#proxylisttable>tfoot>tr>th:nth-of-type(5)>select>[value='anonymous']");
 
         List<Proxy> listIpPort = new ArrayList<>();
 
