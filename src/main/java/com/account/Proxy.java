@@ -1,8 +1,8 @@
 package com.account;
 
 public class Proxy {
-    String ip;
-    Integer port;
+    private String ip;
+    private Integer port;
 
     public Proxy (String ip, Integer port) {
         this.ip = ip;

@@ -26,7 +26,7 @@ public class AccountGenerator {
         List<Proxy> listIpPort = collectProxies(driver, properties);
 
         for (Proxy item: listIpPort) {
-            WebDriver driverProxy = new FirefoxDriver(setUpProxy(item.getIp(), item.getPort()));
+            @SuppressWarnings("deprecation") WebDriver driverProxy = new FirefoxDriver(setUpProxy(item.getIp(), item.getPort()));
             setUpDriver(driverProxy);
             String email = RandomStringUtils.randomAlphanumeric(Integer.parseInt(properties.getString("minEmailLength")),
                     Integer.parseInt(properties.getString("maxEmailLength")));
