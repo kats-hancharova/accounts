@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 public class AccountGenerator {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws NumberFormatException, InterruptedException {
         ResourceBundle properties = ResourceBundle.getBundle("config");
         String driverLocation = properties.getString("driverLocation");
 
@@ -28,8 +28,8 @@ public class AccountGenerator {
         List<String> credentials = new ArrayList<>();
 
         for (Proxy item : listIpPort) {
-            final FirefoxOptions options = new FirefoxOptions().setProfile(setUpProxy(item.getIp(), item.getPort()));
-            final WebDriver driverProxy = new FirefoxDriver(options);
+            FirefoxOptions options = new FirefoxOptions().setProfile(setUpProxy(item.getIp(), item.getPort()));
+            WebDriver driverProxy = new FirefoxDriver(options);
 
             setUpDriver(driverProxy);
             String email = RandomStringUtils.randomAlphanumeric(Integer.parseInt(properties.getString("minEmailLength")),
@@ -52,12 +52,16 @@ public class AccountGenerator {
                 if (driverProxy.findElements(By.cssSelector(".welcome>h1")).size() > 0) {
                     credentials.add(email + "@gmail.com," + properties.getString("password"));
                 }
-            } catch (NumberFormatException | InterruptedException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             } finally {
-                Files.write(Paths.get(properties.getString("credentialsLocation")), credentials);
                 driverProxy.close();
             }
+        }
+        try {
+            Files.write(Paths.get(properties.getString("credentialsLocation")), credentials);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
