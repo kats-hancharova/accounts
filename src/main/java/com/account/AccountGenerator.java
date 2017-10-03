@@ -14,17 +14,21 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import static com.account.Property.*;
+
 public class AccountGenerator {
 
+    private static final byte MIN_EMAIL_LENGTH = Byte.parseByte(getProperty("minEmailLength"));
+    private static final byte MAX_EMAIL_LENGTH = Byte.parseByte(getProperty("maxEmailLength"));
+
     public static void main(String[] args) throws NumberFormatException, InterruptedException {
-        ResourceBundle properties = ResourceBundle.getBundle("config");
-        String driverLocation = properties.getString("driverLocation");
+        String driverLocation = getProperty("driverLocation");
 
         System.setProperty("webdriver.gecko.driver", driverLocation);
         WebDriver driver = new FirefoxDriver();
         setUpDriver(driver);
 
-        List<Proxy> listIpPort = collectProxies(driver, properties);
+        List<Proxy> listIpPort = collectProxies(driver);
         List<String> credentials = new ArrayList<>();
 
         for (Proxy item : listIpPort) {
@@ -32,11 +36,10 @@ public class AccountGenerator {
             WebDriver driverProxy = new FirefoxDriver(options);
 
             setUpDriver(driverProxy);
-            String email = RandomStringUtils.randomAlphanumeric(Integer.parseInt(properties.getString("minEmailLength")),
-                    Integer.parseInt(properties.getString("maxEmailLength")));
+            String email = RandomStringUtils.randomAlphanumeric(MIN_EMAIL_LENGTH, MAX_EMAIL_LENGTH);
 
             try {
-                fillOutSignUpForm(driverProxy, properties, email);
+                fillOutSignUpForm(driverProxy, email);
 
                 driverProxy.switchTo().activeElement();
 
@@ -50,7 +53,7 @@ public class AccountGenerator {
                 }
                 clickElement(driverProxy, "iagreebutton");
                 if (driverProxy.findElements(By.cssSelector(".welcome>h1")).size() > 0) {
-                    credentials.add(email + "@gmail.com," + properties.getString("password"));
+                    credentials.add(email + "@gmail.com," + getProperty("password"));
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -59,7 +62,7 @@ public class AccountGenerator {
             }
         }
         try {
-            Files.write(Paths.get(properties.getString("credentialsLocation")), credentials);
+            Files.write(Paths.get(getProperty("credentialsLocation")), credentials);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -93,8 +96,8 @@ public class AccountGenerator {
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
     }
 
-    private static List<Proxy> collectProxies(WebDriver driver, ResourceBundle properties) {
-        getPageURL(driver, properties, "proxyListPage");
+    private static List<Proxy> collectProxies(WebDriver driver) {
+        getPageURL(driver, "proxyListPage");
 
         setElementValueByCssSelector(driver, ".hx.ui-state-default>select");
         setElementValueByCssSelector(driver, ".hx.ui-state-default>select>[value='yes']");
@@ -111,26 +114,26 @@ public class AccountGenerator {
         return listIpPort;
     }
 
-    private static void fillOutSignUpForm(WebDriver driver, ResourceBundle properties, String email) {
-        getPageURL(driver, properties, "signUpPage");
-        setElementValueById(driver, properties, "FirstName", "firstName");
-        setElementValueById(driver, properties, "LastName", "lastName");
+    private static void fillOutSignUpForm(WebDriver driver, String email) {
+        getPageURL(driver, "signUpPage");
+        setElementValueById(driver, "FirstName", "firstName");
+        setElementValueById(driver, "LastName", "lastName");
         driver.findElement(By.id("GmailAddress")).sendKeys(email);
-        setElementValueById(driver, properties, "Passwd", "password");
-        setElementValueById(driver, properties, "PasswdAgain", "password");
+        setElementValueById(driver, "Passwd", "password");
+        setElementValueById(driver, "PasswdAgain", "password");
         clickElement(driver, "BirthMonth");
         chooseElementFromList(driver, By.cssSelector("[id='BirthMonth'] [class='goog-menuitem-content']"),
-                properties.getString("birthMonth"));
-        setElementValueById(driver, properties, "BirthDay", "birthDay");
-        setElementValueById(driver, properties, "BirthYear", "birthYear");
+                getProperty("birthMonth"));
+        setElementValueById(driver, "BirthDay", "birthDay");
+        setElementValueById(driver, "BirthYear", "birthYear");
         clickElement(driver, "Gender");
         chooseElementFromList(driver, By.cssSelector("[id='Gender'] [class='goog-menuitem-content']"),
-                properties.getString("gender"));
+                getProperty("gender"));
         clickElement(driver, "submitbutton");
     }
 
-    private static void setElementValueById(WebDriver driver, ResourceBundle properties, String elementId, String elementValue) {
-        driver.findElement(By.id(elementId)).sendKeys(properties.getString(elementValue));
+    private static void setElementValueById(WebDriver driver, String elementId, String elementValue) {
+        driver.findElement(By.id(elementId)).sendKeys(getProperty(elementValue));
     }
 
     private static void setElementValueByCssSelector(WebDriver driver, String elementCssSelector) {
@@ -141,8 +144,8 @@ public class AccountGenerator {
         driver.findElement(By.id(elementId)).click();
     }
 
-    private static void getPageURL(WebDriver driver, ResourceBundle properties, String pageURL) {
-        driver.get(properties.getString(pageURL));
+    private static void getPageURL(WebDriver driver, String pageURL) {
+        driver.get(getProperty(pageURL));
     }
 
 }
