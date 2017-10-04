@@ -11,8 +11,8 @@ public class ProxySupplier {
 
     public static List<Proxy> collectProxies() {
 
-        AccountGoogle driver = new AccountGoogle();
-        driver.goToUrl("proxyListPage");
+        AccountGenerator accountGenerator = new AccountGoogle();
+        accountGenerator.goToUrl("proxyListPage");
 
         getElementBySelector(".hx.ui-state-default>select").click();
         getElementBySelector(".hx.ui-state-default>select>[value='yes']").click();

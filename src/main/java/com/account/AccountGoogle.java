@@ -23,7 +23,7 @@ public class AccountGoogle implements AccountGenerator {
 
         List<Proxy> proxies = collectProxies();
 
-        AccountGoogle driver = new AccountGoogle();
+        AccountGenerator accountGenerator = new AccountGoogle();
         Credentials credentials = new Credentials();
 
         for (Proxy proxy : proxies) {
@@ -34,7 +34,7 @@ public class AccountGoogle implements AccountGenerator {
             String email = RandomStringUtils.randomAlphanumeric(MIN_EMAIL_LENGTH, MAX_EMAIL_LENGTH);
 
             try {
-                driver.fillOutSignUpForm(email);
+                accountGenerator.fillOutSignUpForm(email);
                 getDriver().switchTo().activeElement();
 
                 (new WebDriverWait(getDriver(), 5))
