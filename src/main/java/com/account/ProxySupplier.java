@@ -1,17 +1,18 @@
 package com.account;
 
-        import org.openqa.selenium.By;
+import org.openqa.selenium.By;
 
-        import java.util.ArrayList;
-        import java.util.List;
+import java.util.ArrayList;
+import java.util.List;
 
-        import static com.account.Driver.getDriver;
-        import static com.account.AccountGoogle.*;
+import static com.account.Driver.*;
 
 public class ProxySupplier {
 
     public static List<Proxy> collectProxies() {
-        goToUrl("proxyListPage");
+
+        AccountGoogle driver = new AccountGoogle();
+        driver.goToUrl("proxyListPage");
 
         getElementBySelector(".hx.ui-state-default>select").click();
         getElementBySelector(".hx.ui-state-default>select>[value='yes']").click();
