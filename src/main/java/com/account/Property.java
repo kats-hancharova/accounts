@@ -13,5 +13,4 @@ public class Property {
     public static String getProperty(String property) {
         return properties.getString(property);
     }
-
 }

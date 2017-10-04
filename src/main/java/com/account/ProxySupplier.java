@@ -30,7 +30,9 @@ public class ProxySupplier {
 
             proxies.add(proxy);
         }
+
         getDriver().close();
+
         return proxies;
     }
 }

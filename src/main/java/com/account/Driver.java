@@ -68,5 +68,4 @@ public class Driver {
         profile.setPreference("network.proxy.ssl_port", port);
         return profile;
     }
-
 }

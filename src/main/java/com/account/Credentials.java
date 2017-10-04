@@ -19,6 +19,7 @@ public class Credentials {
 
         DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
         Date date = new Date();
+
         try {
             Files.write(Paths.get(getProperty("credentialsLocation")
                     + getProperty("credentialsFileName")

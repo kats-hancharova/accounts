@@ -23,7 +23,7 @@ public class AccountGoogle implements AccountGenerator {
 
         List<Proxy> proxies = collectProxies();
 
-        AccountGoogle googleAccount = new AccountGoogle();
+        AccountGoogle driver = new AccountGoogle();
         Credentials credentials = new Credentials();
 
         for (Proxy proxy : proxies) {
@@ -34,8 +34,7 @@ public class AccountGoogle implements AccountGenerator {
             String email = RandomStringUtils.randomAlphanumeric(MIN_EMAIL_LENGTH, MAX_EMAIL_LENGTH);
 
             try {
-                googleAccount.fillOutSignUpForm(email);
-
+                driver.fillOutSignUpForm(email);
                 getDriver().switchTo().activeElement();
 
                 (new WebDriverWait(getDriver(), 5))
@@ -59,6 +58,11 @@ public class AccountGoogle implements AccountGenerator {
     }
 
     @Override
+    public void goToUrl(String url) {
+        getDriver().get(getProperty(url));
+    }
+
+    @Override
     public void fillOutSignUpForm(String email) throws InterruptedException {
         goToUrl("signUpPage");
         getElementById("FirstName").sendKeys(getProperty("firstName"));
@@ -77,10 +81,4 @@ public class AccountGoogle implements AccountGenerator {
         Thread.sleep(1000L);
         getElementById("submitbutton").click();
     }
-
-    @Override
-    public void goToUrl(String url) {
-        getDriver().get(getProperty(url));
-    }
-
 }
