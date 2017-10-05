@@ -1,6 +1,7 @@
 package com.account;
 
 public interface AccountGenerator {
-    void goToUrl(String url);
-    void fillOutSignUpForm(String email) throws InterruptedException;
+
+    void fillOutSignUpForm(Driver driver, String email) throws InterruptedException;
+
 }

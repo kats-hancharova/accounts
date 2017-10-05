@@ -1,37 +1,34 @@
 package com.account;
 
-import org.openqa.selenium.By;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.account.Driver.*;
-
 public class ProxySupplier {
 
-    public static List<Proxy> collectProxies() {
+    public List<Proxy> collectProxies() {
 
-        AccountGenerator accountGenerator = new AccountGoogle();
-        accountGenerator.goToUrl("proxyListPage");
+        Driver driver = new Driver();
 
-        getElementBySelector(".hx.ui-state-default>select").click();
-        getElementBySelector(".hx.ui-state-default>select>[value='yes']").click();
+        driver.goToUrl("proxyListPage");
+
+        driver.getElementBySelector(".hx.ui-state-default>select").click();
+        driver.getElementBySelector(".hx.ui-state-default>select>[value='yes']").click();
 
         List<Proxy> proxies = new ArrayList<>();
 
-        int numberOfIPAddresses = getDriver().findElements(By.cssSelector("#proxylisttable>tbody>tr")).size();
+        int numberOfIPAddresses = driver.getElementsBySelector("#proxylisttable>tbody>tr").size();
 
         for (int i = 1; i <= numberOfIPAddresses; i++) {
-            String port = getDriver()
-                    .findElement(By.cssSelector("tbody>tr:nth-of-type(" + i + ")>td:nth-of-type(1)")).getText();
-            String ip = getDriver()
-                    .findElement(By.cssSelector("tbody>tr:nth-of-type(" + i + ")>td:nth-of-type(2)")).getText();
+            String port = driver
+                    .getElementBySelector("tbody>tr:nth-of-type(" + i + ")>td:nth-of-type(1)").getText();
+            String ip = driver
+                    .getElementBySelector("tbody>tr:nth-of-type(" + i + ")>td:nth-of-type(2)").getText();
             Proxy proxy = new Proxy(port, Integer.parseInt(ip));
 
             proxies.add(proxy);
         }
 
-        getDriver().close();
+        driver.close();
 
         return proxies;
     }
