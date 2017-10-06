@@ -23,7 +23,8 @@ public class GoogleAccountGenerator implements AccountGenerator {
         List<Proxy> proxies = supplier.collectProxies();
 
         for (Proxy proxy : proxies) {
-            FirefoxOptions options = new FirefoxOptions().setProfile(setUpProxyProfile(proxy.getIp(), proxy.getPort()));
+            FirefoxOptions options = new FirefoxOptions()
+                    .setProfile(setUpProxyProfile(proxy.getIp(), proxy.getPort()));
             Driver driver = new Driver(options);
 
             Credentials credentials = new Credentials(generateEmail());
@@ -32,14 +33,15 @@ public class GoogleAccountGenerator implements AccountGenerator {
                 fillOutSignUpForm(driver, credentials.getEmail());
 
                 driver.toActiveElement();
-
                 driver.waitForElement("tos-scroll-button-icon");
 
                 do {
                     driver.getElementByClass("tos-scroll-button-icon").click();
                     Thread.sleep(1000L);
                 } while (driver.getElementByClass("tos-scroll-button-icon").isDisplayed());
+
                 driver.getElementById("iagreebutton").click();
+
                 if (isRegistrationSuccessful(driver)) {
                     credentialsStore.addToList(credentials);
                 }

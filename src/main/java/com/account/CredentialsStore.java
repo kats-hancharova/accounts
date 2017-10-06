@@ -22,7 +22,8 @@ public class CredentialsStore {
 
         try {
             StringBuilder credentialsRecord = new StringBuilder();
-            Files.write(Paths.get(credentialsRecord.append(getProperty("credentialsLocation"))
+            Files.write(Paths.get(credentialsRecord
+                    .append(getProperty("credentialsLocation"))
                     .append(getProperty("credentialsFileName"))
                     .append(dateFormat.format(date))
                     .append(getProperty("credentialsFileExt")).toString()), credentialsList);
