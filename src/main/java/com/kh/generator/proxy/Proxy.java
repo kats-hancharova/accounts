@@ -1,4 +1,4 @@
-package com.account;
+package com.kh.generator.proxy;
 
 public class Proxy {
 
@@ -17,4 +17,5 @@ public class Proxy {
     public Integer getPort() {
         return port;
     }
+
 }

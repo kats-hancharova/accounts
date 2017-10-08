@@ -1,4 +1,4 @@
-package com.account;
+package com.kh.generator.common;
 
 import java.util.ResourceBundle;
 
@@ -13,4 +13,5 @@ public class Property {
     public static String getProperty(String property) {
         return properties.getString(property);
     }
+
 }
