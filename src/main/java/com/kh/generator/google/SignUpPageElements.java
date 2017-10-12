@@ -7,7 +7,7 @@ import org.openqa.selenium.support.PageFactory;
 
 import java.util.List;
 
-import static com.kh.generator.common.Property.*;
+import static com.kh.generator.commons.Property.*;
 
 public class SignUpPageElements {
 

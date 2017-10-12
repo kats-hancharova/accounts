@@ -1,8 +1,8 @@
-package com.kh.generator.common;
+package com.kh.generator.commons;
 
 import org.apache.commons.lang3.RandomStringUtils;
 
-import static com.kh.generator.common.Property.getProperty;
+import static com.kh.generator.commons.Property.getProperty;
 
 public class UserDetails {
 

@@ -1,7 +1,7 @@
 package com.kh.generator.google;
 
-import com.kh.generator.common.UserDetails;
-import com.kh.generator.common.CredentialsStore;
+import com.kh.generator.commons.UserDetails;
+import com.kh.generator.commons.CredentialsStore;
 import com.kh.generator.proxy.Proxy;
 import com.kh.generator.proxy.ProxySupplier;
 import com.kh.generator.interfaces.AccountGenerator;
@@ -83,7 +83,7 @@ public class GoogleAccountGenerator implements AccountGenerator {
 
     public boolean isRegistrationSuccessful(Driver driver) {
         WelcomePageElements pageElements = new WelcomePageElements(driver.getDriver());
-        return (pageElements.getWelcomeText().size() > 0) ? true : false;
+        return pageElements.getWelcomeText().size() > 0;
     }
 
     public FirefoxProfile setUpProxyProfile(String ip, Integer port) {

@@ -1,4 +1,4 @@
-package com.kh.generator.common;
+package com.kh.generator.commons;
 
 import java.util.ResourceBundle;
 

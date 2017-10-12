@@ -10,7 +10,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static com.kh.generator.common.Property.getProperty;
+import static com.kh.generator.commons.Property.getProperty;
 
 public class Driver {
 

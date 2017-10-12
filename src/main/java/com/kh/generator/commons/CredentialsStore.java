@@ -1,4 +1,4 @@
-package com.kh.generator.common;
+package com.kh.generator.commons;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -31,8 +31,8 @@ public class CredentialsStore {
 
     }
 
-    public void addToList(UserDetails credentials) {
-        credentialsList.add(credentials.getEmail() + "@gmail.com," + credentials.getPassword());
+    public void addToList(UserDetails userDetails) {
+        credentialsList.add(userDetails.getEmail() + "@gmail.com," + userDetails.getPassword());
     }
 
 }

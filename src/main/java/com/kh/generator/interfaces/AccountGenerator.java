@@ -1,6 +1,6 @@
 package com.kh.generator.interfaces;
 
-import com.kh.generator.common.UserDetails;
+import com.kh.generator.commons.UserDetails;
 import com.kh.generator.google.SignUpPageElements;
 import com.kh.generator.webdriver.Driver;
 

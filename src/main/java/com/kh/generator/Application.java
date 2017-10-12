@@ -1,4 +1,4 @@
-package com.kh.generator.app;
+package com.kh.generator;
 
 import com.kh.generator.google.GoogleAccountGenerator;
 
